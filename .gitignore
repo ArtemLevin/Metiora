@@ -1,0 +1,121 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.so
+.pytype/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.cache/
+
+# Virtualenv / env managers
+.venv/
+venv/
+env/
+.loom/
+.python-version
+
+# Jupyter
+.ipynb_checkpoints/
+
+# ---- Project Secrets & Env ----
+.env
+.env.*
+!.env.example
+*.env.local
+*.secret
+secrets.*
+**/secrets.json
+**/secrets.yaml
+*.pem
+*.key
+*.crt
+*.p12
+*.keystore
+
+# ---- Logs & Temp ----
+logs/
+*.log
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+
+# ---- Databases & Storage (local dev) ----
+*.sqlite
+*.sqlite3
+*.db
+data/
+storage/
+uploads/
+media/
+static/generated/
+
+# ---- FastAPI / Build Artifacts ----
+dist/
+build/
+
+# ---- Alembic ----
+# (версии миграций обычно храним; кэш/локальные файлы — игнор)
+alembic.ini.bak
+
+# ---- Frontend (Next.js/Streamlit optional) ----
+node_modules/
+.npm/
+.pnp/
+.pnp.js
+.pnpm-store/
+.turbo/
+.next/
+out/
+coverage/
+# lock-файлы не игнорим: package-lock.json / yarn.lock / pnpm-lock.yaml
+
+# ---- Docker / Compose ----
+.docker/
+docker/**/tmp/
+docker/**/cache/
+docker-compose.override.yml
+docker-compose.local.yml
+# Локальные volume каталоги
+volumes/
+postgres-data/
+redis-data/
+minio-data/
+
+# ---- Kubernetes / Helm ----
+# Манифесты обычно храним в репозитории,
+# игнорируем лишь локальные значения и собранные чарты
+values.local.yaml
+helm-packages/
+*.tgz
+
+# ---- Monitoring / Reports ----
+reports/
+profiling/
+perf/
+*.svg
+*.png
+*.pdf
+
+# ---- IDE / Editor ----
+# VSCode
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.example.json
+
+# JetBrains
+.idea/
+*.iml
+
+# Others
+.DS_Store
+Thumbs.db
