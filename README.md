@@ -128,39 +128,45 @@ MIT License. Используйте свободно, ссылаясь на ав
 
 ## 🧩 Диаграммы (UML & Архитектура)
 
-> Все диаграммы оформлены в **Mermaid** — GitHub их рендерит автоматически.  
+> Все диаграммы оформлены в **Mermaid** — GitHub их рендерит автоматически.
 > Если просматриваете локально, используйте плагины для VSCode/JetBrains или откройте файл в GitHub.
 
 ### 1) Обзор архитектуры (System Context / C4-уровень 1)
 
 ```mermaid
+%% Подстраховка: отключаем HTML-лейблы для совместимости с GitHub
+%% (не обязательно, но уменьшает шанс артефактов рендеринга)
+%%{init: {'flowchart': {'htmlLabels': false}} }%%
+
 graph TD
+    %% Узлы
     subgraph "Пользователи"
-      U[Пользователь SMB]
+      U["Пользователь SMB"]
     end
 
     subgraph "Внешние сервисы"
-      G[Google OAuth]
-      M[Microsoft OAuth]
-      S[Stripe Billing]
-      Gmail[Gmail API]
-      Outlook[Outlook API]
-      OAI[LLM Provider (OpenAI/Local)]
+      G["Google OAuth"]
+      M["Microsoft OAuth"]
+      S["Stripe Billing"]
+      Gmail["Gmail API"]
+      Outlook["Outlook API"]
+      OAI["LLM Provider (OpenAI\/Local)"]
     end
 
     subgraph "AI Assistant for SMB (SaaS)"
-      A[API Gateway / FastAPI]
-      AU[Auth Service]
-      AIS[AI Service]
-      ES[Email Service]
-      W[Worker / Celery]
-      FE[Frontend (Streamlit/Next.js)]
+      A["API Gateway / FastAPI"]
+      AU["Auth Service"]
+      AIS["AI Service"]
+      ES["Email Service"]
+      W["Worker / Celery"]
+      FE["Frontend (Streamlit/Next.js)"]
       DB[(PostgreSQL)]
       R[(Redis)]
       OBJ[(Object Storage S3/MinIO)]
-      MON[Monitoring: Prometheus/Grafana/Sentry]
+      MON["Monitoring\: Prometheus\/Grafana\/Sentry"]
     end
 
+    %% Связи
     U -->|JWT/OAuth| A
     A --> AU
     A --> FE
@@ -178,42 +184,47 @@ graph TD
     ES --> Gmail
     ES --> Outlook
     A --> S
-    MON -. scrape/export .- A
-    MON -. scrape/export .- W
-    MON -. scrape/export .- ES
+    MON -. "scrape/export" .-> A
+    MON -. "scrape/export" .-> W
+    MON -. "scrape/export" .-> ES
     A --> OBJ
     W --> OBJ
+
 ```
 
 ### 2) Сервисы и взаимодействия (Container diagram / C4-уровень 2)
 
 ```mermaid
+g%%{init: {'flowchart': {'htmlLabels': false}} }%%
 graph LR
-  UI[Frontend (Next.js/Streamlit)] -->|REST/GraphQL| API[FastAPI Gateway]
-  API --> AUTH[Auth Service]
-  API --> AI[AI Service]
-  API --> EMAIL[Email Service]
-  API --> BUS[Domain Layer]
-  API --> CACHE[Redis]
+  UI["Frontend (Next.js/Streamlit)"] -->|REST/GraphQL| API["FastAPI Gateway"]
+  API --> AUTH["Auth Service"]
+  API --> AI["AI Service"]
+  API --> EMAIL["Email Service"]
+  API --> BUS["Domain Layer"]
+  API --> CACHE["Redis"]
   API --> DB[(PostgreSQL)]
-  EMAIL --> QUEUE[Celery Queue]
+  EMAIL --> QUEUE["Celery Queue"]
   AI --> QUEUE
-  QUEUE --> WORKER[Celery Workers]
+  QUEUE --> WORKER["Celery Workers"]
   WORKER --> DB
   WORKER --> CACHE
-  WORKER --> LLM[LLM Provider]
-  EMAIL --> GMAIL[Gmail API]
-  EMAIL --> OUTL[Outlook API]
-  API --> BILL[Stripe]
+  WORKER --> LLM["LLM Provider"]
+  EMAIL --> GMAIL["Gmail API"]
+  EMAIL --> OUTL["Outlook API"]
+  API --> BILL["Stripe"]
   API --> S3[(Object Storage)]
+
   subgraph Observability
-    PROM[Prometheus]
-    GRAF[Grafana]
-    SENTRY[Sentry]
+    PROM["Prometheus"]
+    GRAF["Grafana"]
+    SENTRY["Sentry"]
   end
-  API -.metrics/traces/logs.-> PROM
-  WORKER -.metrics/traces/logs.-> PROM
-  EMAIL -.metrics/traces/logs.-> PROM
+
+  API -. "metrics/traces/logs" .-> PROM
+  WORKER -. "metrics/traces/logs" .-> PROM
+  EMAIL -. "metrics/traces/logs" .-> PROM
+
 ```
 
 ### 3) Последовательность: автоответ на входящее письмо
@@ -249,6 +260,30 @@ sequenceDiagram
 
 ```mermaid
 classDiagram
+  %% === Перечисления ===
+  class GenStatus {
+    <<enumeration>>
+    draft
+    ready
+    failed
+  }
+
+  class ReplyStatus {
+    <<enumeration>>
+    draft
+    approved
+    sent
+  }
+
+  class SubStatus {
+    <<enumeration>>
+    trial
+    active
+    past_due
+    canceled
+  }
+
+  %% === Модели ===
   class User {
     +id: UUID
     +email: str
@@ -271,7 +306,7 @@ classDiagram
     +template_id: UUID
     +owner_id: UUID
     +payload: JSON
-    +status: enum{draft,ready,failed}
+    +status: GenStatus
     +file_url: str
     +cost_tokens: int
     +created_at: datetime
@@ -281,10 +316,10 @@ classDiagram
     +id: UUID
     +external_id: str
     +owner_id: UUID
-    +from: str
-    +to: str
+    +from_addr: str
+    +to_addr: str
     +subject: str
-    +body: text
+    +body_text: text
     +received_at: datetime
   }
 
@@ -294,7 +329,7 @@ classDiagram
     +owner_id: UUID
     +draft_text: text
     +quality_score: float
-    +status: enum{draft,approved,sent}
+    +status: ReplyStatus
     +created_at: datetime
   }
 
@@ -310,7 +345,7 @@ classDiagram
     +id: UUID
     +user_id: UUID
     +plan_id: UUID
-    +status: enum{trial,active,past_due,canceled}
+    +status: SubStatus
     +stripe_sub_id: str
     +renew_at: datetime
   }
@@ -324,14 +359,16 @@ classDiagram
     +created_at: datetime
   }
 
+  %% === Связи ===
   User "1" -- "many" DocumentTemplate : owns
-  DocumentTemplate "1" -- "many" GeneratedDocument : produces >
+  DocumentTemplate "1" -- "many" GeneratedDocument : produces
   User "1" -- "many" GeneratedDocument : owns
   User "1" -- "many" EmailMessage : owns
-  EmailMessage "1" -- "1" EmailReplyDraft : has >
-  User "1" -- "1" Subscription : has >
-  Plan "1" -- "many" Subscription : referenced by >
-  User "1" -- "many" AuditLog : acts >
+  EmailMessage "1" -- "1" EmailReplyDraft : has
+  User "1" -- "1" Subscription : has
+  Plan "1" -- "many" Subscription : referenced by
+  User "1" -- "many" AuditLog : acts
+
 ```
 
 ### 5) Диаграмма деплоя (k8s)
