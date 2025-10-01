@@ -1,0 +1,37 @@
+# Ruff configuration: linter + formatter
+# Docs: https://docs.astral.sh/ruff/
+line-length = 100
+target-version = "py312"
+
+extend-exclude = [
+  "alembic/versions",
+  "migrations",
+  "node_modules",
+  ".venv",
+  "venv",
+  "build",
+  "dist",
+]
+
+[lint]
+# Rule sets: E,F,W (pycodestyle/pyflakes), I (isort), B (bugbear), UP (pyupgrade), etc.
+select = ["E", "F", "W", "I", "B", "UP", "N", "A", "C4", "PIE", "T20", "Q", "RUF"]
+ignore = [
+  "E203",  # Compatible with Black around slicing whitespace
+  "E501",  # Line length handled by formatter/line-length
+]
+
+[lint.isort]
+combine-as-imports = true
+known-first-party = ["app", "ai", "email_service"]
+required-imports = ["from __future__ import annotations"]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+skip-magic-trailing-comma = false
+
+[lint.per-file-ignores]
+# Alembic env & versions often have dynamic imports and globals
+"alembic/**" = ["E402", "F401", "F403", "ANN*", "B008"]
