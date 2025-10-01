@@ -195,7 +195,7 @@ graph TD
 ### 2) Сервисы и взаимодействия (Container diagram / C4-уровень 2)
 
 ```mermaid
-g%%{init: {'flowchart': {'htmlLabels': false}} }%%
+%%{init: {'flowchart': {'htmlLabels': false}} }%%
 graph LR
   UI["Frontend (Next.js/Streamlit)"] -->|REST/GraphQL| API["FastAPI Gateway"]
   API --> AUTH["Auth Service"]
